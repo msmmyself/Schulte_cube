@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>舒尔特方块游戏</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #e0e0e0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        #app {
+            text-align: center;
+            background: #fff;
+            padding: 20px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 120, 255, .3);
+        }
+
+        button {
+            background-color: #008CBA;
+            color: white;
+            padding: 10px 24px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 4px 14px rgba(0, 120, 255, .3);
+            transition: background-color 0.3s ease-out, transform 0.2s ease-out;
+        }
+
+        button:hover {
+            background-color: #007CBA;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 120, 255, .4);
+        }
+
+        button:active {
+            background-color: #006CBA;
+            transform: translateY(0);
+            box-shadow: 0 4px 14px rgba(0, 120, 255, .3);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 10px;
+            background: #fafafa;
+            border-radius: 15px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease-out;
+        }
+
+        .square {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            border-radius: 8px;
+            user-select: none;
+            background-image: linear-gradient(135deg, #76b852, #8DC26F);
+            transition:
+                background-color 0.3s ease,
+                transform 0.2s ease-out,
+                box-shadow 0.2s ease-out;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .square.correct {
+            background-image: linear-gradient(135deg, #f44336, #ff5722);
+            box-shadow: 0 0 15px rgba(255, 87, 34, 0.8);
+        }
+
+        .square.incorrect {
+            animation: shake 0.5s ease-in-out alternate;
+        }
+
+        .square:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .timer {
+            margin-top: 20px;
+            color: #555;
+        }
+
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translate3d(-1px, 0, 0);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(2px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translate3d(-4px, 0, 0);
+            }
+
+            40%,
+            60% {
+                transform: translate3d(4px, 0, 0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h1>舒尔特方块游戏</h1>
+        <button onclick="startGame()">开始游戏</button>
+        <div class="grid" id="grid"></div>
+        <div class="timer" id="timer">时间: 0 秒</div>
+    </div>
+    <script>
+        let numbers = [];
+        let nextNumber = 1;
+        let time = 0;
+        let timer = null;
+
+        function startGame() {
+            clearInterval(timer);
+            time = 0;
+            nextNumber = 1;
+            numbers = [];
+            let orderedNumbers = Array.from({ length: 25 }, (_, i) => i + 1);
+            while (orderedNumbers.length) {
+                let randomIndex = Math.floor(Math.random() * orderedNumbers.length);
+                let number = {
+                    value: orderedNumbers.splice(randomIndex, 1)[0],
+                    correct: false,
+                    incorrect: false
+                };
+                numbers.push(number);
+            }
+
+
+            updateGrid();
+            timer = setInterval(updateTime, 1000);
+        }
+
+        function updateGrid() {
+            let gridHTML = '';
+            numbers.forEach((number, index) => {
+                gridHTML += `<div class="square${number.correct ? ' correct' : ''}${number.incorrect ? ' incorrect' : ''}" onclick="clickSquare(${index})">${number.value}</div>`;
+            });
+            document.getElementById('grid').innerHTML = gridHTML;
+        }
+
+        function clickSquare(index) {
+            if (numbers[index].value === nextNumber) {
+                numbers[index].correct = true;
+                numbers[index].incorrect = false;
+                nextNumber++;
+            } else {
+                numbers[index].incorrect = true;
+                setTimeout(() => {
+                    numbers[index].incorrect = false;
+                    updateGrid();
+                }, 500);
+            }
+            updateGrid();
+
+            if (nextNumber > 25) {
+                clearInterval(timer);
+                alert('恭喜你！你完成了游戏！');
+            }
+        }
+
+        function updateTime() {
+            time++;
+            document.getElementById('timer').textContent = `时间: ${time} 秒`;
+        }
+    </script>
+</body>
+
+</html>
